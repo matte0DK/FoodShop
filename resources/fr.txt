@@ -1,0 +1,1 @@
+notenoughmoney = vous n'avez pas assez d'argent.
