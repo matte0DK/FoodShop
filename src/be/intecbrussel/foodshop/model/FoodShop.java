@@ -13,7 +13,8 @@ public class FoodShop {
     private CustomerRepository customerRepository;
 
     // constructor
-    public FoodShop() {
+    public FoodShop(Stock stock) {
+        this.stock = stock;
         this.registers = new ArrayList<>();
         registers.add(new Register());
     }
@@ -69,24 +70,18 @@ public class FoodShop {
         Map<Food, Integer> foodStock = stock.getFoodStock();
 
         if (!stock.getFoodStock().containsKey(food)) {
-            throw new FoodNotInStockException();
+            throw new FoodNotInStockException(food.getName() + "is not in stock!");
         }
 
         if (foodStock.get(food) < amount) {
-            throw new NotEnoughFoodInStockException();
+            throw new NotEnoughFoodInStockException("There is not enough" + food.getName() + " in stock!");
         }
     }
 
     private void checkCustomerMoney(Customer customer, Order order) throws NotEnoughMoneyException {
         boolean notEnough = order.getTotalPrice() > customer.getMoney();
         if (notEnough) {
-            throw new NotEnoughMoneyException();
-        }
-    }
-
-    private void addFoodBackIntoStock(Order order) throws FoodNotInStockException {
-        for (Map.Entry<Food, Integer> entry : order.getFoodItems().entrySet()) {
-            stock.addToStock(entry.getKey(), entry.getValue());
+            throw new NotEnoughMoneyException("Get a job u bum! you only have " + customer.getMoney() + " while you're order is this much: " + order.getTotalPrice());
         }
     }
 
