@@ -46,60 +46,55 @@ public class FoodShop {
 
     // SELL FOOD METHOD
     public Map<Food, Integer> sellFood(Order order, Customer customer) throws NotEnoughFoodInStockException, FoodNotInStockException, NotEnoughMoneyException {
-        // check if all food is available
-        enoughStockForOrder(order);
 
-        // calculate the total order price and check of customer has enough money
-        customerHasEnoughMoney(customer, order);
-
-        // remove order from stock
+        checkStock(order);
+        checkCustomerMoney(customer, order);
         removeFoodFromStock(order);
-
-        // update the money of customer
         updateCustomersMoney(customer, order);
-
-        // add money to register (In which register will I add money ???
         addMoneyToRegister(order);
 
         return order.getFoodItems();
     }
 
     // PRIVATE METHODS!!!
-
-    private void enoughStockForOrder(Order order) {
-            removeFoodFromStock(order);
+    private void checkStock(Order order) throws FoodNotInStockException, NotEnoughFoodInStockException {
+        for (Map.Entry<Food, Integer> entry : order.getFoodItems().entrySet()) {
+            Food food = entry.getKey();
+            Integer amount = entry.getValue();
+            checkFoodInStock(food, amount);
+        }
     }
 
-    private void customerHasEnoughMoney(Customer customer, Order order) throws NotEnoughMoneyException {
+    private void checkFoodInStock(Food food, Integer amount) throws NotEnoughFoodInStockException, FoodNotInStockException {
+        Map<Food, Integer> foodStock = stock.getFoodStock();
+
+        if (!stock.getFoodStock().containsKey(food)) {
+            throw new FoodNotInStockException();
+        }
+
+        if (foodStock.get(food) < amount) {
+            throw new NotEnoughFoodInStockException();
+        }
+    }
+
+    private void checkCustomerMoney(Customer customer, Order order) throws NotEnoughMoneyException {
         boolean notEnough = order.getTotalPrice() > customer.getMoney();
         if (notEnough) {
-            addFoodBackIntoStock(order);
             throw new NotEnoughMoneyException();
         }
     }
 
-    private void addFoodBackIntoStock(Order order) {
+    private void addFoodBackIntoStock(Order order) throws FoodNotInStockException {
         for (Map.Entry<Food, Integer> entry : order.getFoodItems().entrySet()) {
-            try {
-                stock.addToStock(entry.getKey(), entry.getValue());
-            } catch (FoodNotInStockException foodNotInStockException) {
-                // should never be triggered!!!
-                foodNotInStockException.printStackTrace();
-            }
+            stock.addToStock(entry.getKey(), entry.getValue());
         }
     }
 
-    private void removeFoodFromStock(Order order) {
+    private void removeFoodFromStock(Order order) throws FoodNotInStockException, NotEnoughFoodInStockException {
         for (Map.Entry<Food, Integer> entry : order.getFoodItems().entrySet()) {
             Food food = entry.getKey();
             Integer amount = entry.getValue();
-            try {
-                stock.removeFromStock(food, amount);
-            } catch (NotEnoughFoodInStockException notEnoughFoodInStockException) {
-                order.getFoodItems().remove(food);
-            } catch (FoodNotInStockException foodNotInStockException) {
-                order.getFoodItems().remove(food);
-            }
+            stock.removeFromStock(food, amount);
         }
     }
 
