@@ -2,7 +2,7 @@ package be.intecbrussel.foodshop.model;
 
 public class Customer {
     private String name;
-    private final int ID;
+    private int ID;
     private String email;
     private double money;
 
@@ -41,8 +41,12 @@ public class Customer {
         this.money = money;
     }
 
+    public void setID(Integer valueOfId) { this.ID = valueOfId; }
+
     @Override
     public String toString() {
         return String.format("CUSTOMER  Name: %-10s   ID: %-10s   Email: %-15s   Money: %-5.2f$ ", name, ID, email, money);
     }
+
+
 }
